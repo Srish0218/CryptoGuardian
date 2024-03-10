@@ -1,7 +1,10 @@
 import streamlit as st
 import hashlib
-st.set_page_config(layout="wide")
-
+st.set_page_config(
+    page_title="CryptoGuardian",
+    page_icon="🛡️",
+    layout="wide"
+)
 
 def calculate_hash(hash_function, data):
     if hash_function == "SHA-256":
@@ -153,9 +156,7 @@ SHA-2 is a family of hash functions with different bit lengths: SHA-224, SHA-256
    - Internal Block Size: 64 bits
    - Offers a higher level of security, often used in critical applications.
 
-### SHA-1 (Included for Comparison):
-
-**SHA-1:**
+**5. SHA-1:**
    - Output Size: 160 bits
    - Internal Block Size: 32 bits
    - Deprecated due to vulnerabilities; should not be used for cryptographic purposes.
