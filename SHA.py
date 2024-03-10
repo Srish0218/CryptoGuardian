@@ -1,5 +1,7 @@
 import streamlit as st
 import hashlib
+st.set_page_config(layout="wide")
+
 
 def calculate_hash(hash_function, data):
     if hash_function == "SHA-256":
@@ -48,7 +50,7 @@ def results_for_string(data):
                       "BLAKE2s"]
     for algo in hash_functions:
         with st.expander(algo):
-            hash_obj = calculate_hash(algo, input_data.encode())
+            hash_obj = calculate_hash(algo, data.encode())  # Fix: use 'data' instead of 'input_data'
             hashed_value = hash_obj.hexdigest()
             st.write(f"{algo} Hex Hash:")
             st.info(hashed_value)
@@ -61,6 +63,7 @@ def results_for_string(data):
             except AttributeError:
                 # For algorithms that don't support digest(), display a warning
                 st.warning(f"{algo} Digest: Not supported!!!")
+
 
 
 # Streamlit App
@@ -98,7 +101,92 @@ elif Feature == "Compare Hashing":
                     st.error("Hashes do not match! Data integrity may be compromised.")
 
 
+st.markdown("""
+    <style>
+        .container-with-border {
+            padding: 10px;
+            width: 85%;
+            max-height: 250px; /* Set the maximum height for the container */
+            overflow-y: auto; /* Add vertical scroll if content exceeds the maximum height */
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+    </style>
+""", unsafe_allow_html=True)
+
 # Define input_data outside the "I want to enter data" block
+if st.checkbox("Get Theory in Detail!!"):
+    st.markdown(
+        """
+        <div class="container-with-border">
+        
+
+### Overview of Secure Hash Algorithms (SHA):
+
+**1. What is a Hash Function?**
+A hash function is a mathematical algorithm that takes an input (or 'message') and produces a fixed-size string of characters, which is typically a hash code. The output, or hash, is unique to the input data, and even a small change in the input should result in a significantly different hash.
+
+**2. Purpose of Hash Functions:**
+Hash functions serve various purposes, including data integrity verification, digital signatures, password storage, and, notably, in the context of blockchain, ensuring the integrity of blocks and creating unique identifiers for transactions.
+
+### SHA-2 Family:
+
+SHA-2 is a family of hash functions with different bit lengths: SHA-224, SHA-256, SHA-384, SHA-512, SHA-512/224, and SHA-512/256. The number in each name denotes the length of the hash output in bits.
+
+**1. SHA-256:**
+   - Output Size: 256 bits
+   - Internal Block Size: 32 bits
+   - It is widely used in blockchain technology, providing a balance between security and efficiency.
+
+**2. SHA-384:**
+   - Output Size: 384 bits
+   - Internal Block Size: 32 bits
+   - Truncated version of SHA-512, often used in digital signatures and certificates.
+
+**3. SHA-224:**
+   - Output Size: 224 bits
+   - Internal Block Size: 32 bits
+   - A truncated version of SHA-256, designed for applications with limited space.
+
+**4. SHA-512:**
+   - Output Size: 512 bits
+   - Internal Block Size: 64 bits
+   - Offers a higher level of security, often used in critical applications.
+
+### SHA-1 (Included for Comparison):
+
+**SHA-1:**
+   - Output Size: 160 bits
+   - Internal Block Size: 32 bits
+   - Deprecated due to vulnerabilities; should not be used for cryptographic purposes.
+
+### Hashing Process:
+
+1. **Encoding:**
+   - Before hashing, the input data is encoded into bytes. In the provided Python code, `str1.encode()` converts the string "Krish Naik1" into bytes.
+
+2. **Hash Calculation:**
+   - The hash object, such as `hashlib.sha256()`, is initialized with the encoded data.
+   - The `update()` method can be used for incremental updates, but in this example, it's not necessary.
+
+3. **Hexadecimal Representation:**
+   - The `hexdigest()` method converts the binary hash into a human-readable hexadecimal representation.
+
+### Use Cases:
+
+- **Blockchain:**
+  - In blockchain technology, SHA-256 is commonly used to create unique identifiers (hashes) for blocks.
+  - The deterministic nature of hash functions ensures that a block's hash changes if any information in the block is modified, maintaining the integrity of the blockchain.
+
+- **Data Integrity:**
+  - Hash functions are used to verify the integrity of transmitted or stored data. The recipient can recompute the hash and check if it matches the original hash.
+
+- **Digital Signatures:**
+  - Hash functions are an integral part of digital signatures, providing a compact representation of data that is signed for verification purposes.
+
+In summary, Secure Hash Algorithms play a crucial role in ensuring data integrity, security, and uniqueness in various applications, with SHA-256 being a fundamental component in blockchain technology.
+     </div>   """ , unsafe_allow_html=True
+    )
 
 
 footer = """<style>
