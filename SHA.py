@@ -1,11 +1,33 @@
+import time
 import streamlit as st
 import hashlib
+import matplotlib.pyplot as plt
+import numpy as np
+import base64
+
+
 st.set_page_config(
     page_title="CryptoGuardian",
     page_icon="🛡️",
     layout="wide"
 )
 
+def perform_hashing(data):
+    # Example: Using SHA-256 for hashing
+    hashed_value = hashlib.sha256(data.encode()).hexdigest()
+    return hashed_value
+def generate_hash_results(data):
+    # Generate hash results based on the provided data
+    # Replace with your actual hash generation code
+    hash_results = perform_hashing(data)
+    return hash_results
+
+def get_binary_file_downloader_html(bin_file, file_label='File'):
+    with open(bin_file, 'rb') as f:
+        data = f.read()
+    b64 = base64.b64encode(data).decode()
+    href = f'<a href="data:application/octet-stream;base64,{b64}" download="{bin_file}" target="_blank">{file_label}</a>'
+    return href
 def calculate_hash(hash_function, data):
     if hash_function == "SHA-256":
         return hashlib.sha256(data)
@@ -27,10 +49,122 @@ def calculate_hash(hash_function, data):
         return hashlib.blake2b(data)
     elif hash_function == "BLAKE2s":
         return hashlib.blake2s(data)
+def create_pie_chart(labels, sizes):
+    fig, ax = plt.subplots()
+    ax.pie(sizes, labels=labels, autopct='%1.1f%%', startangle=90)
+    ax.axis('equal')  # Equal aspect ratio ensures that pie is drawn as a circle.
+    ax.set_title('Algorithm Distribution')
+    return fig
+def visualizer(hash_functions , hash_lengths):
+    st.markdown("## Visualization")
 
-def results_for_uploading_file(input_data):
+    c1, c2, c3, c4, c5 = st.columns(5)
+
+    with c1:
+        st.markdown("#### Hash Lenghts")
+        fig_lengths, ax_lengths = plt.subplots(figsize=(10, 6))
+        ax_lengths.plot(hash_functions, hash_lengths, marker='o', label='Hash Lengths')
+        ax_lengths.set_ylabel('Hash Length (bits)')
+        ax_lengths.set_title('Hash Algorithm Lengths')
+        ax_lengths.legend()
+        st.pyplot(fig_lengths)
+
+    with c2:
+        st.markdown("#### Algorithm Distribution")
+        fig_pie = create_pie_chart(hash_functions, hash_lengths)
+        st.pyplot(fig_pie)
+
+    with c3:
+        st.markdown("Historical Hashing")
+        time_points = ["Time 1", "Time 2", "Time 3", "Time 4", "Time 5"]
+        hash_values = np.random.rand(len(time_points),
+                                     len(hash_functions)) * 1000
+        fig_historical, ax_historical = plt.subplots(figsize=(10, 6))
+        for i, algo in enumerate(hash_functions):
+            ax_historical.plot(time_points, hash_values[:, i], marker='o', label=algo)
+
+        ax_historical.set_ylabel('Hash Values')
+        ax_historical.set_title('Historical Hashing Comparison')
+        ax_historical.legend()
+
+        # Display the line chart for historical hashing using Streamlit
+        st.pyplot(fig_historical)
+
+    with c4:
+        st.markdown("Radar Chart")
+        # Placeholder data for illustration
+        attributes = ['Speed', 'Security', 'Flexibility', 'Collision Resistance']
+        hash_functions = ["SHA-256", "SHA-384", "SHA-224", "SHA-512", "SHA-1", "MD5", "SHA3-256", "SHA3-512",
+                          "BLAKE2b", "BLAKE2s"]
+
+        # Generate random scores for each algorithm and attribute
+        scores = np.random.rand(len(hash_functions), len(attributes))
+
+        # Radar chart for algorithm comparison
+        fig_radar, ax_radar = plt.subplots(figsize=(8, 8), subplot_kw=dict(polar=True))
+        for i, algo in enumerate(hash_functions):
+            ax_radar.plot(np.linspace(0, 2 * np.pi, len(attributes), endpoint=False), scores[i], label=algo)
+        ax_radar.fill(np.linspace(0, 2 * np.pi, len(attributes), endpoint=False), scores[0], alpha=0.25)
+
+        # Customize chart appearance and labels
+        ax_radar.set_xticks(np.linspace(0, 2 * np.pi, len(attributes), endpoint=False))
+        ax_radar.set_xticklabels(attributes)
+        ax_radar.set_title('Comparison of Hash Algorithms')
+        ax_radar.legend()
+
+        # Display the radar chart for algorithm comparison using Streamlit
+        st.pyplot(fig_radar)
+
+    with c5:
+        st.markdown("Hash Collisions")
+        # Generate random collision likelihood scores for each algorithm
+        collision_likelihood = np.random.rand(len(hash_functions), len(hash_functions))
+
+        # Heatmap for collision likelihood
+        fig_heatmap, ax_heatmap = plt.subplots(figsize=(10, 8))
+        heatmap = ax_heatmap.imshow(collision_likelihood, cmap='viridis')
+
+        # Customize chart appearance and labels
+        ax_heatmap.set_xticks(np.arange(len(hash_functions)))
+        ax_heatmap.set_yticks(np.arange(len(hash_functions)))
+        ax_heatmap.set_xticklabels(hash_functions)
+        ax_heatmap.set_yticklabels(hash_functions)
+        plt.setp(ax_heatmap.get_xticklabels(), rotation=45, ha="right", rotation_mode="anchor")
+        ax_heatmap.set_title('Hash Collision Likelihood')
+        fig_heatmap.colorbar(heatmap)
+
+        # Display the heatmap for collision likelihood using Streamlit
+        st.pyplot(fig_heatmap)
+
+
+
+    st.markdown("#### Hash Digests")
+    digest_distribution_data = {}
+    for hash_algorithm in hash_functions:
+        simulated_distribution = np.random.randint(5, 25, size=16)
+        digest_distribution_data[hash_algorithm] = simulated_distribution / sum(simulated_distribution) * 100
+    for hash_algorithm in hash_functions:
+        digest_distribution = digest_distribution_data.get(hash_algorithm, [])
+        if len(digest_distribution) == 0:
+            continue
+        fig, ax = plt.subplots()
+        ax.pie(digest_distribution, labels=[f"{i:x}" for i in range(16)], autopct='%1.1f%%', startangle=90,
+               colors=plt.cm.tab20c.colors)
+    col1, col2 = st.columns(2)
+    with col1:
+        for algo in hash_functions[5:]:
+            with st.expander(algo):
+                ax.set_title(f"{hash_algorithm} Digest Distribution")
+                st.pyplot(fig)
+    with col2:
+        for algo in hash_functions[:5]:
+            with st.expander(algo):
+                ax.set_title(f"{hash_algorithm} Digest Distribution")
+                st.pyplot(fig)
+def results_for_uploading_file(input_data,hash_functions , hash_lengths):
+    st.markdown("#### Hash and Digest Values: ")
+
     # Hash function selection
-    hash_functions = ["SHA-256", "SHA-384", "SHA-224", "SHA-512", "SHA-1", "MD5", "SHA3-256", "SHA3-512", "BLAKE2b", "BLAKE2s"]
     for algo in hash_functions:
         with st.expander(algo):
             hash_obj = calculate_hash(algo, input_data)
@@ -46,83 +180,73 @@ def results_for_uploading_file(input_data):
             except AttributeError:
                 # For algorithms that don't support digest(), display a warning
                 st.warning(f"{algo} Digest: Not supported!!!")
-
-def results_for_string(data):
+    visualizer(hash_functions, hash_lengths)
+def results_for_string(data, hash_functions , hash_lengths):
+    st.markdown("#### Hash and Digest Values: ")
     # Hash function selection
-    hash_functions = ["SHA-256", "SHA-384", "SHA-224", "SHA-512", "SHA-1", "MD5", "SHA3-256", "SHA3-512", "BLAKE2b",
-                      "BLAKE2s"]
-    for algo in hash_functions:
-        with st.expander(algo):
-            hash_obj = calculate_hash(algo, data.encode())  # Fix: use 'data' instead of 'input_data'
-            hashed_value = hash_obj.hexdigest()
-            st.write(f"{algo} Hex Hash:")
-            st.info(hashed_value)
+    col1, col2 = st.columns(2)
+    with col1:
+        for algo in hash_functions[:5]:
+            with st.expander(algo):
+                hash_obj = calculate_hash(algo, data.encode())  # Fix: use 'data' instead of 'input_data'
+                hashed_value = hash_obj.hexdigest()
+                st.write(f"{algo} Hex Hash:")
+                st.info(hashed_value)
+                try:
+                    # Attempt to use the digest() method for algorithms that support it
+                    hash_digest = hash_obj.digest()
+                    st.write(f"{algo} Digest: ")
+                    st.info(hash_digest)
+                except AttributeError:
+                    # For algorithms that don't support digest(), display a warning
+                    st.warning(f"{algo} Digest: Not supported!!!")
+    with col2:
+        for algo in hash_functions[5:]:
+            with st.expander(algo):
+                hash_obj = calculate_hash(algo, data.encode())  # Fix: use 'data' instead of 'input_data'
+                hashed_value = hash_obj.hexdigest()
+                st.write(f"{algo} Hex Hash:")
+                st.info(hashed_value)
 
-            try:
-                # Attempt to use the digest() method for algorithms that support it
-                hash_digest = hash_obj.digest()
-                st.write(f"{algo} Digest: ")
-                st.info(hash_digest)
-            except AttributeError:
-                # For algorithms that don't support digest(), display a warning
-                st.warning(f"{algo} Digest: Not supported!!!")
-
+                try:
+                    # Attempt to use the digest() method for algorithms that support it
+                    hash_digest = hash_obj.digest()
+                    st.write(f"{algo} Digest: ")
+                    st.info(hash_digest)
+                except AttributeError:
+                    # For algorithms that don't support digest(), display a warning
+                    st.warning(f"{algo} Digest: Not supported!!!")
+    visualizer(hash_functions, hash_lengths)
 
 
 # Streamlit App
 st.title("CryptoGuardian 🛡️️")
+# SideBar
+st.sidebar.header("Get Theory in Detail!!")
+with st.sidebar.expander("Visualizations Overview"):
+    st.markdown(
+        """
+    <div class="container-with-border">
+    
+- **Hash Lengths:** Visualizes the bit lengths of different hash algorithms, providing an understanding of their output sizes.
+- **Algorithm Distribution:** Shows the popularity distribution of hash algorithms within the application.
+- **Historical Hashing:** Displays changes in hash values over time for each algorithm.
+- **Radar Chart:** Compares hash algorithms based on attributes like speed, security, flexibility, and collision resistance.
+- **Hash Collisions:** Presents a heatmap indicating the likelihood of collisions between hash algorithms.
+- **Hash Digests:** Utilizes doughnut charts to illustrate the distribution of hash digest components for each algorithm.
 
-Feature = st.selectbox("What do you want to do:" , ("Hashing Data" , "Compare Hashing"))
+## Disclaimer
+    
+The visualizations on this page use a combination of real-world data and simulated data for illustrative purposes. When interpreting the results, keep in mind that actual hash algorithm characteristics may vary based on specific benchmarks and real-world scenarios.
+Explore and enjoy the visual journey through the world of hash algorithms with CryptoGuardian!
+        </div>   """, unsafe_allow_html=True
+    )
 
-if Feature == "Hashing Data":
-    method = st.selectbox("Select method", ("I want to enter data", "I want to upload file"))
-
-    if method == "I want to enter data":
-        # Input string
-        input_data = st.text_area("Enter Data:")
-        if st.button("Generate Hash"):
-            if input_data:
-                results_for_string( input_data)
-
-    elif method == "I want to upload file":
-        label = "Choose a file"
-        uploaded_file = st.file_uploader(label)
-        if uploaded_file is not None:
-            data = uploaded_file.read()
-            if st.button("Generate Hash"):
-                results_for_uploading_file(data)
-
-elif Feature == "Compare Hashing":
-        st.text("Enter two hash values to compare:")
-        hash1 = st.text_input("Hash 1:")
-        hash2 = st.text_input("Hash 2:")
-        if st.button("Compare"):
-            if hash1 and hash2:
-                if hash1 == hash2:
-                    st.success("Hashes match! Data integrity is preserved.")
-                else:
-                    st.error("Hashes do not match! Data integrity may be compromised.")
-
-
-st.markdown("""
-    <style>
-        .container-with-border {
-            padding: 10px;
-            width: 85%;
-            max-height: 250px; /* Set the maximum height for the container */
-            overflow-y: auto; /* Add vertical scroll if content exceeds the maximum height */
-            border: 1px solid #ddd;
-            border-radius: 5px;
-        }
-    </style>
-""", unsafe_allow_html=True)
-
-# Define input_data outside the "I want to enter data" block
-if st.checkbox("Get Theory in Detail!!"):
+with st.sidebar.expander("Overview of Hash Algorithms"):
     st.markdown(
         """
         <div class="container-with-border">
-        
+
 
 ### Overview of Hash Algorithms:
 
@@ -255,9 +379,75 @@ When selecting a hash function from the BLAKE family, the choice between BLAKE2b
   - Hash functions are an integral part of digital signatures, providing a compact representation of data that is signed for verification purposes.
 
 In summary, Secure Hash Algorithms play a crucial role in ensuring data integrity, security, and uniqueness in various applications, with SHA-256 being a fundamental component in blockchain technology.
-     </div>   """ , unsafe_allow_html=True
+     </div>   """, unsafe_allow_html=True
     )
 
+
+
+
+Feature = st.selectbox("What do you want to do:", ("Hashing Data", "Compare Hashing"))
+
+if Feature == "Hashing Data":
+    method = st.selectbox("Select method", ("I want to enter data", "I want to upload file"))
+    hash_functions = ["SHA-256", "SHA-384", "SHA-224", "SHA-512", "SHA-1", "MD5", "SHA3-256", "SHA3-512", "BLAKE2b",
+                      "BLAKE2s"]
+    hash_lengths = [256, 384, 224, 512, 160, 128, 256, 512, 512, 256]
+
+    if method == "I want to enter data":
+        # Input string
+        input_data = st.text_area("Enter Data:")
+        if st.button("Generate Hash"):
+            if input_data:
+                # Generate hash results
+                hash_results = generate_hash_results(input_data)
+                # Display hash results
+                results_for_string(hash_results , hash_functions , hash_lengths)
+            else:
+                st.error("Please enter data before generating hash.")
+
+    elif method == "I want to upload file":
+        label = "Choose a file"
+        uploaded_file = st.file_uploader(label)
+        if uploaded_file is not None:
+            data = uploaded_file.read()
+            if st.button("Generate Hash"):
+                results_for_uploading_file(data , hash_functions , hash_lengths)
+                if st.button("Download Hash Results"):
+                    # Generate hash results
+                    # Save results to a file (e.g., CSV, JSON, etc.)
+                    # Replace 'results_file.csv' with the actual file name
+                    results_file = 'results_file.csv'
+                    # Provide a download link for the results file
+                    st.markdown(get_binary_file_downloader_html(results_file, 'Download Results'),
+                                unsafe_allow_html=True)
+
+elif Feature == "Compare Hashing":
+    st.text("Enter two hash values to compare:")
+    hash1 = st.text_input("Hash 1:")
+    hash2 = st.text_input("Hash 2:")
+    if st.button("Compare"):
+        if hash1 and hash2:
+            if hash1 == hash2:
+                st.success("Hashes match! Data integrity is preserved.")
+            else:
+                st.error("Hashes do not match! Data integrity may be compromised.")
+
+
+
+st.markdown("""
+    <style>
+        .container-with-border {
+            padding: 10px;
+            width: 100%;
+            max-height: 500px; /* Set the maximum height for the container */
+            overflow-y: auto; /* Add vertical scroll if content exceeds the maximum height */
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+    </style>
+""", unsafe_allow_html=True)
+
+# Define input_data outside the "I want to enter data" block
 
 footer = """<style>
 a:link , a:visited{
