@@ -2,8 +2,7 @@
 
 ## Repository Status: Closed
 
-This repository is now closed and no longer actively maintained. However, you can find the latest updates and code in the new repository called [CryptoGuardian](https://github.com/Srish0218/CryptoGuardian).
-
+This repository is now closed and no longer actively maintained. However, you can find the latest updates and code in the new repository called [CryptoGuardian](https://github.com/Srish0218/Crypto-Guardian).
 ## Why the Change?
 
 The decision to close this repository and move to a new one was made for various reasons, including:
@@ -16,7 +15,7 @@ The decision to close this repository and move to a new one was made for various
 
 ## How to Proceed
 
-To access the latest code, documentation, and updates, please navigate to the new repository at [CryptoGuardian](https://github.com/Srish0218/CryptoGuardian). You'll find all the familiar features and functionalities along with improvements and enhancements.
+To access the latest code, documentation, and updates, please navigate to the new repository at [CryptoGuardian](https://github.com/Srish0218/Crypto-Guardian). You'll find all the familiar features and functionalities along with improvements and enhancements.
 
 ## Contact
 
